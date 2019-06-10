@@ -1,6 +1,4 @@
-<p align="center"><img src="https://laravel.com/assets/img/components/logo-laravel.svg"></p>
+## Is Holiday Today
 
-## About ispublicholiday
-
-This is the api which will let you know whether today is pulic holiday or not.
+The API is to know if today is a public holiday or not as per country.
 

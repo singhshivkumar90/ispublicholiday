@@ -4,44 +4,67 @@ namespace App\Services;
 
 use Carbon\Carbon;
 use GuzzleHttp\Client;
+use GuzzleHttp\Exception\RequestException;
 use GuzzleHttp\Exception\GuzzleException;
 
 class PublicHolidayService
 {
     /**
-     * Check whether today is public holiday based on country
-     *
      * @param $country
      *
-     * @return array|bool
+     * @return array
+     *
+     * @throws GuzzleException
      */
-    public function checkIsHolidayToday($country)
+    public function checkIsHolidayToday($country): array
+    {
+        $uri = $this->getUri($country);
+
+        $client = new Client();
+
+        try {
+            $result = $client->request('GET', $uri);
+        } catch (RequestException $exception) {
+            throw $exception;
+        }
+
+        $holiday = head(json_decode($result->getBody(), true)['response']['holidays']);
+
+        $response = $this->getResponse($holiday);
+
+        return $response;
+    }
+
+    /**
+     * @param $country
+     *
+     * @return string
+     */
+    private function getUri($country): string
     {
         $year = Carbon::now()->year;
         $month = Carbon::now()->month;
         $day = Carbon::now()->day;
 
-        $apiKey = env('API_KEY');
-        $baseUri = "https://calendarific.com/api/v2/holidays?&api_key=$apiKey&country=$country&year=$year&month=$month&day=$day";
+        $apiKey = config('api.key');
+        $baseUri = config('api.base_url');
 
-        $client = new Client();
+        $uri = $baseUri . "?&api_key=$apiKey&country=$country&year=$year&month=$month&day=$day";
 
-        try {
-            $result = $client->request('GET', $baseUri);
-        } catch (GuzzleException $exception) {
+        return $uri;
+    }
 
-            return $response = [ 'errorCode' => $exception->getCode(), 'errorMessage' => 'Request can not be fulfilled'];
-        }
-
-        $holiday = head(json_decode($result->getBody(), true)['response']['holidays']);
-
+    /**
+     * @param $holiday
+     *
+     * @return array
+     */
+    private function getResponse($holiday): array
+    {
         if (empty($holiday)) {
-            return false;
-        } else {
-            return [
-                'is_holiday' => true,
-                'name' => $holiday['name']
-            ];
+            return ['is_holiday' => false];
         }
+
+        return ['is_holiday' => true, 'name' => $holiday['name']];
     }
 }

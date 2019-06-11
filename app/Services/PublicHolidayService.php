@@ -19,7 +19,6 @@ class PublicHolidayService
     public function checkIsHolidayToday($country): array
     {
         $uri = $this->getUri($country);
-
         $client = new Client();
 
         try {
@@ -28,9 +27,7 @@ class PublicHolidayService
             throw $exception;
         }
 
-        $holiday = head(json_decode($result->getBody(), true)['response']['holidays']);
-
-        $response = $this->getResponse($holiday);
+        $response = $this->getResponse($result);
 
         return $response;
     }
@@ -55,12 +52,14 @@ class PublicHolidayService
     }
 
     /**
-     * @param $holiday
+     * @param $result
      *
      * @return array
      */
-    private function getResponse($holiday): array
+    private function getResponse($result): array
     {
+        $holiday = head(json_decode($result->getBody(), true)['response']['holidays']);
+
         if (empty($holiday)) {
             return ['is_holiday' => false];
         }

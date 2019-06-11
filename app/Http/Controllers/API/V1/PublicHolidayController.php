@@ -36,11 +36,9 @@ class PublicHolidayController extends BaseController
     {
         try {
             $result = $this->publicHolidayService->checkIsHolidayToday($country);
+            return $this->sendResponse($result, Response::HTTP_OK);
         } catch (Exception $exception) {
-
-            return response()->json(['errorCode' => $exception->getCode(), 'errorMessage' => 'Service is unavailable'], Response::HTTP_SERVICE_UNAVAILABLE);
+            return $this->sendResponse($exception->getCode(), Response::HTTP_SERVICE_UNAVAILABLE, 'Service is unavailable');
         }
-
-        return response()->json(['data' => $result], Response::HTTP_OK);
     }
 }

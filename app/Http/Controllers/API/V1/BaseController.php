@@ -14,7 +14,7 @@ class BaseController extends Controller
      * @param array $headers
      * @return JsonResponse
      */
-    public function sendResponse($responseData, int $responseCode, $message = '', array $headers = []) : JsonResponse
+    public function sendResponse($responseData, int $responseCode, $message = 'Success', array $headers = []) : JsonResponse
     {
         return response()->json(
             ['data' => $responseData, 'message' => $message],
